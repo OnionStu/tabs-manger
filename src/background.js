@@ -21,7 +21,7 @@ chrome.tabs.onCreated.addListener(() => setTabsCount(++tabCount));
 chrome.tabs.onRemoved.addListener(() => setTabsCount(--tabCount));
 
 chrome.browserAction.onClicked.addListener(function() {
-  const index = chrome.extension.getURL('popup.html');
+  const index = chrome.extension.getURL('index.html');
   chrome.tabs.getAllInWindow(undefined, function(tabs) {
     for (let i = 0, tab; (tab = tabs[i]); i++) {
       if (tab.url && tab.url === index) {
