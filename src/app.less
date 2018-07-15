@@ -1,0 +1,33 @@
+.main-layout {
+  height: 100vh;
+  overflow: auto;
+  .ant-layout-header {
+    position: fixed;
+    z-index: 1;
+    width: 100%;
+    // box-shadow: 0 15px 20px -10px #ccc;
+    border-bottom: 1px solid #ccc;
+  }
+  .ant-layout-content {
+    padding: 0px 50px;
+    margin-top: 84px;
+  }
+}
+
+.tab-item {
+  margin-bottom: 20px;
+  .ant-card {
+    padding: 1px;
+    transition: box-shadow .3s;
+  }
+  .ant-card-meta-description {
+    overflow: auto;
+    word-break: break-all;
+    line-height: 1.5;
+    height: 4.5em;
+  }
+  .active-tab, .ant-card:hover {
+    // border-color: aqua;
+    box-shadow: 1px 1px 10px 0 #ccc;
+  }
+}
