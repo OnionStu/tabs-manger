@@ -23,6 +23,6 @@
   ],
   "background": {
     "persistent": false,
-    "scripts": ["background.js"]
+    "scripts": ["static/js/background.js"]
   }
 }
