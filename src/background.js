@@ -64,9 +64,7 @@ chrome.browserAction.onClicked.addListener(function() {
   try {
     const index = chrome.extension.getURL('index.html');
     chrome.tabs.getAllInWindow(undefined, function(tabs) {
-      console.log(tabs);
       for (let i = 0, tab; (tab = tabs[i]); i++) {
-        console.log(tab, tab.url);
         if (tab.url && tab.url === index) {
           chrome.tabs.update(tab.id, { selected: true });
           return;

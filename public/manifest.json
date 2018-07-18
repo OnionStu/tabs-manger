@@ -22,6 +22,6 @@
   ],
   "background": {
     "persistent": false,
-    "scripts": ["static/js/background.js"]
+    "page": "background.html"
   }
 }
