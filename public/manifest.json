@@ -17,9 +17,8 @@
   "permissions": [
     "tabs",
     "background",
-    "activeTab",
-    "storage",
-    "<all_urls>"
+    "<all_urls>",
+    "storage"
   ],
   "background": {
     "persistent": false,
