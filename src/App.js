@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import { Layout, Card, Avatar, Icon, Row, Col } from 'antd';
 import classNames from 'classnames';
 
-import { sendMessage, updateTab, getTab } from './utils';
-import pic from './pic.png';
+import { sendMessage, updateTab, getTab, deleteTabs, tabStatus, reloadTab } from './utils';
 import './app.less';
 
 const { Header, Content } = Layout;
@@ -21,11 +20,7 @@ class App extends Component {
   }
 
   handlePushpin = async event => {
-    console.log('...');
-
     const { dataset } = event.target;
-    console.log(dataset);
-
     if (dataset && dataset.tabid) {
       const tabId = +dataset.tabid;
       const tab = await getTab(tabId);
@@ -36,6 +31,18 @@ class App extends Component {
         return { tabs };
       });
     }
+  };
+
+  handleReload = event => {
+    const { dataset } = event.target;
+    const tabId = +dataset.tabid;
+    reloadTab(tabId);
+  };
+  handleClose = async event => {
+    const { dataset } = event.target;
+    const tabId = +dataset.tabid;
+    await deleteTabs(tabId);
+    this.setState(prevState => ({ tabs: prevState.tabs.filter(tab => tab.id !== tabId) }));
   };
 
   render() {
@@ -60,8 +67,14 @@ class App extends Component {
                       cover={<img src={tab.capture} alt={tab.title} />}
                       actions={[
                         <Icon type={pushpinIcon} data-tabid={tab.id} data-index={index} onClick={this.handlePushpin} />,
-                        <Icon type="reload" />,
-                        <Icon type="close" />
+                        <Icon
+                          type="reload"
+                          spin={tab.status === tabStatus.LOADING}
+                          data-tabid={tab.id}
+                          data-index={index}
+                          onClick={this.handleReload}
+                        />,
+                        <Icon type="close" data-tabid={tab.id} data-index={index} onClick={this.handleClose} />
                       ]}
                     >
                       <Meta
