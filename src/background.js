@@ -1,3 +1,10 @@
+/**
+ * TODO:
+ * 1. 添加，删除时，实时更新
+ * 2. loading 完成时要更新
+ * 3. 暂时没想到
+ */
+
 import { getTab, tabStatus, getOpenTabs } from './utils';
 
 console.log('Background start at %s', +new Date());
@@ -27,18 +34,21 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   return true;
 });
 
-chrome.tabs.onCreated.addListener(() => {
+chrome.tabs.onCreated.addListener((tab) => {
+  console.log('onCreated...', tab);
   setTabsCount(++tabCount);
 });
 
-chrome.tabs.onRemoved.addListener(() => {
+chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
+  console.log('onRemoved...', tabId, removeInfo);
   setTabsCount(--tabCount);
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  console.log(tabId, changeInfo, tab);
+  console.log('onUpdated...',tabId, changeInfo, tab);
 });
 
+// callback 中 只有 tabId， windowId, windowId暂时没啥用，所以只取tabId
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   const tab = await getTab(tabId);
   console.log('onActivated...', tab);
