@@ -1,21 +1,9 @@
-import { getTab } from './utils';
+import { getTab, tabStatus, getOpenTabs } from './utils';
 
 console.log('Background start at %s', +new Date());
 let tabCount = 0;
 const captureMaps = {};
 
-const tabStatus = {
-  LOADING: 'loading',
-  COMPLETE: 'complete'
-};
-
-function getOpenTabs() {
-  return new Promise(resolve => {
-    chrome.tabs.query({ currentWindow: true }, tabs => {
-      resolve(tabs);
-    });
-  });
-}
 function setTabsCount(num) {
   chrome.browserAction.setBadgeText({ text: String(num) });
 }
@@ -42,12 +30,15 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 chrome.tabs.onCreated.addListener(() => {
   setTabsCount(++tabCount);
 });
+
 chrome.tabs.onRemoved.addListener(() => {
   setTabsCount(--tabCount);
 });
+
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    console.log(tabId, changeInfo, tab);
-  });
+  console.log(tabId, changeInfo, tab);
+});
+
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   const tab = await getTab(tabId);
   console.log('onActivated...', tab);
