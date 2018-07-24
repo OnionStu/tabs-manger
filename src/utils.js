@@ -12,13 +12,20 @@ export function sendMessage(params) {
   });
 }
 
-
-export function getOpenTabs() {
+export function queryTabs(queryParams) {
   return new Promise(resolve => {
-    chrome.tabs.query({ currentWindow: true }, tabs => {
+    chrome.tabs.query(queryParams, tabs => {
       resolve(tabs);
     });
   });
+}
+
+export function getCurrentTab() {
+  return queryTabs({ active: true, currentWindow: true });
+}
+
+export function getOpenTabs() {
+  return queryTabs({ currentWindow: true });
 }
 
 export function getTab(tabId) {
@@ -30,29 +37,29 @@ export function getTab(tabId) {
 }
 
 export function updateTab(tabId, updateProperties) {
+  console.log('updateTab ... ', tabId, updateProperties);
   return new Promise(resolve => {
-    chrome.tabs.update(tabId, updateProperties, tab =>{
-      resolve(tab)
+    chrome.tabs.update(tabId, updateProperties, tab => {
+      resolve(tab);
     });
-  })
+  });
 }
 
 export function reloadTab(tabId) {
   return new Promise(resolve => {
-    chrome.tabs.reload(tabId, () =>{
-      resolve()
+    chrome.tabs.reload(tabId, () => {
+      resolve();
     });
-  })
+  });
 }
 
 export function deleteTabs(tabIds) {
   return new Promise(resolve => {
-    chrome.tabs.remove(tabIds, () =>{
-      resolve()
+    chrome.tabs.remove(tabIds, () => {
+      resolve();
     });
-  })
+  });
 }
-
 
 // export function sendMessage(params, callback) {
 //   console.log(+new Date());
