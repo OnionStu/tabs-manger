@@ -5,7 +5,6 @@
  * 8. 格子 和 列表 切换
  * 9. 撤回刚刚删除的？
  * 10. 多选删除？
- * 11. 搜索 想打开的tab
  * 12. 如果当前页在刷新，如果刷新完成的时候，还在当前，而且冇截图，就截屏个屏
  * 13. 统计偶然不准
  * 14. 统计数应该 只算当前窗口
@@ -17,6 +16,7 @@
  * 2. loading 完成时要更新
  * 3. 点击切换到对应 Tab
  * 5. 点击tab时更新tabs
+ * 11. 搜索 想打开的tab
  */
 
 import { getTab, tabStatus, getOpenTabs, getCurrentTab, sendMessage } from './utils';
