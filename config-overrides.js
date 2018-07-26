@@ -11,7 +11,9 @@ module.exports = function override(config, env) {
   config = injectBabelPlugin(['import', { libraryName: 'antd', style: true }], config);
   config = rewireLess.withLoaderOptions({ javascriptEnabled: true, modifyVars: theme })(config, env);
   config = rewireESLint.withLoaderOptions({ globals: { chrome: true } })(config, env);
-  config = addEntry({ background: path.resolve(__dirname, './src/background.js') },true)(config, env);
-  config = noHash(config, env);
+  if (env === 'production') {
+    config = addEntry({ background: path.resolve(__dirname, './src/background.js') }, true)(config, env);
+    config = noHash(config, env);
+  }
   return config;
 };

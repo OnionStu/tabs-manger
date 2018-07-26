@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, Card, Avatar, Icon, Row, Col } from 'antd';
+import { Layout, Card, Avatar, Icon, Row, Col, Input } from 'antd';
 import classNames from 'classnames';
 
 import { sendMessage, updateTab, getTab, deleteTabs, tabStatus, reloadTab } from './utils';
@@ -7,9 +7,10 @@ import './app.less';
 
 const { Header, Content } = Layout;
 const { Meta } = Card;
+const { Search } = Input;
 
 class App extends Component {
-  state = { tabs: [] };
+  state = { tabs: [], searchValue: '' };
 
   async componentDidMount() {
     const { tabs } = await sendMessage({ msg: 'getTabs' });
@@ -71,6 +72,32 @@ class App extends Component {
     updateTab(tabId, { active: true });
   };
 
+  handleSearchChange = event => {
+    const el = event.currentTarget;
+    this.setState(() => ({ searchValue: el.value }));
+  };
+
+  /**
+   * 标签过滤
+   * @param {Array} tabs 要过滤的标签列表
+   * @param {String} str 搜索的关键字
+   * @memberof App
+   */
+  tabsFilter = (tabs, str) => {
+    if (!str) return tabs;
+    if (!str.trim()) return tabs;
+    const chineseReg = /[\u4e00-\u9fa5]/g;
+    const hasChinese = chineseReg.test(str);
+    const valueReg = eval(`/${str}/i`);
+    const result = tabs.filter(tab => {
+      // 如果 没有中文，就只匹配url，如果url有包含关键字 返回true
+      if (!hasChinese && valueReg.test(tab.url)) return true;
+      // 如果有 中文，就再匹配标题
+      return valueReg.test(tab.title);
+    });
+    return result;
+  };
+
   updateTab = (tabId, newTab) => {
     this.setState(prevState => {
       const currTabs = prevState.tabs;
@@ -84,16 +111,18 @@ class App extends Component {
 
   render() {
     const itemLayout = { sm: 12, md: 12, xl: 8, xxl: 6 },
-      { tabs } = this.state;
+      { tabs, searchValue } = this.state;
+    const tabList = this.tabsFilter(tabs, searchValue);
     return (
       <Layout className="main-layout">
         <Header>
-          <h1>当前打开的标签：</h1>
+          <span className="header-title">当前打开的标签：</span>
+          <Search className="header-search" onChange={this.handleSearchChange} />
         </Header>
         <Content>
           <Row gutter={20} type="flex" className="tab-list">
-            {tabs &&
-              tabs.map(tab => {
+            {tabList &&
+              tabList.map(tab => {
                 const cardClass = classNames({ 'active-tab': tab.active });
                 const pushpinIcon = `pushpin${tab.pinned ? '' : '-o'}`;
                 return (

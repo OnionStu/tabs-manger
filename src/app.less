@@ -6,6 +6,24 @@
     z-index: 233;
     width: 100%; // box-shadow: 0 15px 20px -10px #ccc;
     border-bottom: 1px solid #ccc;
+    .header-title,
+    .header-search {
+      font-size: 2em;
+      display: inline-block;
+    }
+    .header-search {
+      float: right;
+      width: auto;
+      line-height: inherit;
+      .ant-input-affix-wrapper {}
+      .ant-input {
+        height: inherit;
+        font-size: inherit;
+        border-radius: 999px;
+        padding-left: 1em;
+        padding-right: 1.5em;
+      }
+    }
   }
   .ant-layout-content {
     padding: 0px 50px;
