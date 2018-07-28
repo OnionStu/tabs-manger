@@ -1,14 +1,14 @@
 /**
  * TODO:
  * 6. 用canvas缩小缩略图
- * 7. 快捷方式(好似冇？)
  * 8. 格子 和 列表 切换
  * 9. 撤回刚刚删除的？
- * 10. 多选删除？
+ * 10. 批量删除？
  * 12. 如果当前页在刷新，如果刷新完成的时候，还在当前，而且冇截图，就截屏个屏
  * 13. 统计偶然不准
  * 14. 统计数应该 只算当前窗口
  * 15. 点图片展开大图
+ * 16. 换了eavl
  * 4. 暂时没想到
  *
  * DONE:
@@ -16,6 +16,7 @@
  * 2. loading 完成时要更新
  * 3. 点击切换到对应 Tab
  * 5. 点击tab时更新tabs
+ * 7. 快捷方式(好似冇？)
  * 11. 搜索 想打开的tab
  */
 
@@ -37,17 +38,30 @@ function formatTabs(tabs, captures) {
   });
 }
 
-getOpenTabs().then(tabs => {
-  tabCount = tabs.length;
-  console.log('open %s tabs', tabCount);
-  setTabsCount(tabCount);
-});
+function openExtensionTab() {
+  chrome.tabs.getAllInWindow(undefined, function(tabs) {
+    for (let i = 0, tab; (tab = tabs[i]); i++) {
+      if (tab.url && tab.url === indexURL) {
+        chrome.tabs.update(tab.id, { selected: true });
+        return;
+      }
+    }
+    console.log('no one create one');
+    chrome.tabs.create({ url: indexURL });
+  });
+}
 
 async function dealWithGetTabs(params, sender) {
   const tabs = await getOpenTabs();
   console.log('send at %s', +new Date());
   sender({ tabs: formatTabs(tabs, captureMaps) });
 }
+
+getOpenTabs().then(tabs => {
+  tabCount = tabs.length;
+  console.log('open %s tabs', tabCount);
+  setTabsCount(tabCount);
+});
 
 chrome.runtime.onMessage.addListener(function({ msg }, sender, sendResponse) {
   console.log('recive ', msg);
@@ -98,17 +112,12 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
 chrome.browserAction.onClicked.addListener(function() {
   console.log('on icon click');
   try {
-    chrome.tabs.getAllInWindow(undefined, function(tabs) {
-      for (let i = 0, tab; (tab = tabs[i]); i++) {
-        if (tab.url && tab.url === indexURL) {
-          chrome.tabs.update(tab.id, { selected: true });
-          return;
-        }
-      }
-      console.log('no one create one');
-      chrome.tabs.create({ url: indexURL });
-    });
+    openExtensionTab();
   } catch (error) {
     console.log('onClicked error', error);
   }
+});
+
+chrome.commands.onCommand.addListener(function(command) {
+  console.log('Command:', command);
 });
