@@ -7,17 +7,30 @@ export function sendMessage(params) {
   return new Promise(resolve => {
     chrome.runtime.sendMessage(params, response => {
       console.log(response);
+      if (response === undefined) return;
       resolve(response);
     });
   });
 }
 
-export function queryTabs(queryParams) {
+export function getAllWindows(queryParams) {
+  return new Promise(resolve => {
+    chrome.windows.getAll(queryParams, windows => {
+      resolve(windows);
+    });
+  });
+}
+
+export function queryTabs(queryParams = {}) {
   return new Promise(resolve => {
     chrome.tabs.query(queryParams, tabs => {
       resolve(tabs);
     });
   });
+}
+
+export function getAllTabs() {
+  return queryTabs();
 }
 
 export function getCurrentTab() {

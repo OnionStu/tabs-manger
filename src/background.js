@@ -5,10 +5,7 @@
  * 9. 撤回刚刚删除的？
  * 10. 批量删除？
  * 12. 如果当前页在刷新，如果刷新完成的时候，还在当前，而且冇截图，就截屏个屏
- * 13. 统计偶然不准
- * 14. 统计数应该 只算当前窗口
  * 15. 点图片展开大图
- * 16. 换了eavl
  * 4. 暂时没想到
  *
  * DONE:
@@ -18,16 +15,28 @@
  * 5. 点击tab时更新tabs
  * 7. 快捷方式(好似冇？)
  * 11. 搜索 想打开的tab
+ * 16. 换了eval
+ *
+ * DELAY:
+ * 13. 统计偶然不准
+ * 14. 统计数应该 只算当前窗口
+ * icon读数不能分窗口显示，tabs数量貌似只能显示总数？但是获取当前窗口又不算总数…
+ * 只能首先获取全部Tabs数量，在打开拓展时才获取当前窗口数量…
  */
 
-import { getTab, tabStatus, getOpenTabs, getCurrentTab, sendMessage } from './utils';
+import { getTab, tabStatus, getOpenTabs, queryTabs, sendMessage, getAllTabs } from './utils';
 
 console.log('Background start at %s', +new Date());
+
 let tabCount = 0;
 const indexURL = chrome.extension.getURL('index.html');
 const captureMaps = {};
 
-function setTabsCount(num) {
+async function setTabsCount(num) {
+  if (num < 1) {
+    const tabs = await getOpenTabs();
+    num = tabs.length;
+  }
   chrome.browserAction.setBadgeText({ text: String(num) });
 }
 
@@ -57,9 +66,10 @@ async function dealWithGetTabs(params, sender) {
   sender({ tabs: formatTabs(tabs, captureMaps) });
 }
 
-getOpenTabs().then(tabs => {
+getAllTabs().then(async tabs => {
   tabCount = tabs.length;
   console.log('open %s tabs', tabCount);
+  console.log('tabs list', tabs);
   setTabsCount(tabCount);
 });
 
@@ -84,9 +94,8 @@ chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   console.log('onUpdated...', tabId, changeInfo, tab);
-  if (tab.url === indexURL) return;
-  const [currentTab] = await getCurrentTab();
-  if (currentTab.url !== indexURL) return;
+  const tabs = await queryTabs({ url: indexURL });
+  if (!tabs.length) return;
   sendMessage({ msg: 'updateTab', tabId, tab });
 });
 
