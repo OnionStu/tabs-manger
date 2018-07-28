@@ -116,7 +116,11 @@ class App extends Component {
     return (
       <Layout className="main-layout">
         <Header>
-          <span className="header-title">当前打开的标签：</span>
+          <span className="header-title">
+            {searchValue
+              ? `当前打开了${tabList.length}个有关于“${searchValue}”的标签`
+              : `当前窗口打开了${tabList.length}个标签：`}
+          </span>
           <Search className="header-search" onChange={this.handleSearchChange} />
         </Header>
         <Content>
