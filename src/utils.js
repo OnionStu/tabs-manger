@@ -3,6 +3,10 @@ export const tabStatus = {
   COMPLETE: 'complete'
 };
 
+export function isOnlyWeb() {
+  return !chrome.tabs;
+}
+
 export function sendMessage(params) {
   return new Promise(resolve => {
     chrome.runtime.sendMessage(params, response => {

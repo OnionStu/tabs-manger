@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, Card, Avatar, Icon, Row, Col, Input } from 'antd';
+import { Layout, Card, Avatar, Icon, Row, Col, Input, Radio, List as AntdList } from 'antd';
 import classNames from 'classnames';
 
 import { sendMessage, updateTab, getTab, deleteTabs, tabStatus, reloadTab } from './utils';
@@ -8,17 +8,97 @@ import './app.less';
 const { Header, Content } = Layout;
 const { Meta } = Card;
 const { Search } = Input;
+const RadioGroup = Radio.Group;
+const RadioBtn = Radio.Button;
+
+const displayTypes = { CARDS: 'cards', LIST: 'list' };
+
+const PushpinIcon = ({ tab, handleClick }) => {
+  const icon = `pushpin${tab.pinned ? '' : '-o'}`;
+  return <Icon type={icon} data-tabid={tab.id} onClick={handleClick} />;
+};
+
+const ReloadIcon = ({ tab, handleClick }) => (
+  <Icon type="reload" spin={tab.status === tabStatus.LOADING} data-tabid={tab.id} onClick={handleClick} />
+);
+
+const CloseIcon = ({ tab, handleClick }) => <Icon type="close" data-tabid={tab.id} onClick={handleClick} />;
+
+const Cards = ({ tabs, handlePinning, handleReload, handleClose, handleSelect }) => {
+  const itemLayout = { sm: 12, md: 12, xl: 8, xxl: 6 };
+  return (
+    <Row gutter={20} type="flex" className="tab-cards">
+      {tabs &&
+        tabs.map(tab => {
+          const cardClass = classNames({ 'active-tab': tab.active });
+
+          return (
+            <Col key={tab.id} className="tab-item" {...itemLayout}>
+              <Card
+                className={cardClass}
+                bordered
+                cover={<img src={tab.capture} alt={tab.title} />}
+                actions={[
+                  <PushpinIcon tab={tab} handleClick={handlePinning} />,
+                  <ReloadIcon tab={tab} handleClick={handleReload} />,
+                  <CloseIcon tab={tab} handleClick={handleClose} />
+                ]}
+              >
+                <Meta
+                  data-tabid={tab.id}
+                  onClick={handleSelect}
+                  title={tab.title}
+                  description={tab.url}
+                  avatar={tab.favIconUrl ? <Avatar src={tab.favIconUrl} /> : <Icon type="file" />}
+                />
+              </Card>
+            </Col>
+          );
+        })}
+    </Row>
+  );
+};
+
+const List = ({ tabs, handlePinning, handleReload, handleClose, handleSelect }) => {
+  return (
+    <AntdList
+      className="tab-list"
+      bordered
+      itemLayout="vertical"
+      size="large"
+      dataSource={tabs}
+      renderItem={tab => (
+        <AntdList.Item
+          key={tab.title}
+          actions={[
+            <PushpinIcon tab={tab} handleClick={handlePinning} />,
+            <ReloadIcon tab={tab} handleClick={handleReload} />,
+            <CloseIcon tab={tab} handleClick={handleClose} />
+          ]}
+          extra={<img alt="capture" src={tab.capture} />}
+        >
+          <AntdList.Item.Meta
+            avatar={<Avatar src={tab.favIconUrl} />}
+            title={
+              <a data-tabid={tab.id} onClick={handleSelect}>
+                {tab.title}
+              </a>
+            }
+            // description={tab.url}
+          />
+          {tab.url}
+        </AntdList.Item>
+      )}
+    />
+  );
+};
 
 class App extends Component {
-  state = { tabs: [], searchValue: '' };
+  state = { display: displayTypes.CARDS, tabs: [], searchValue: '' };
 
   async componentDidMount() {
     const { tabs } = await sendMessage({ msg: 'getTabs' });
-    // tabs.forEach(tab => {
-    //   captures[tab.id] && (tab.capture = captures[tab.id]);
-    // });
     this.setState(() => ({ tabs }));
-
     chrome.runtime.onMessage.addListener(this.handleReceiveMsg);
   }
 
@@ -77,6 +157,11 @@ class App extends Component {
     this.setState(() => ({ searchValue: el.value }));
   };
 
+  handleDisplayChange = event => {
+    const el = event.target;
+    this.setState(() => ({ display: el.value }));
+  };
+
   /**
    * 标签过滤
    * @param {Array} tabs 要过滤的标签列表
@@ -110,54 +195,43 @@ class App extends Component {
   };
 
   render() {
-    const itemLayout = { sm: 12, md: 12, xl: 8, xxl: 6 },
-      { tabs, searchValue } = this.state;
+    const { tabs, searchValue, display } = this.state;
     const tabList = this.tabsFilter(tabs, searchValue);
+    const contentsProps = {
+      tabs: tabList,
+      handleClose: this.handleClose,
+      handlePinning: this.handlePushpin,
+      handleReload: this.handleReload,
+      handleSelect: this.handleCardClick
+    };
     return (
       <Layout className="main-layout">
         <Header>
-          <span className="header-title">
-            {searchValue
-              ? `当前打开了${tabList.length}个有关于“${searchValue}”的标签`
-              : `当前窗口打开了${tabList.length}个标签：`}
-          </span>
-          <Search className="header-search" onChange={this.handleSearchChange} />
+          <Row type="flex">
+            <span className="header-title">
+              {searchValue
+                ? `当前打开了${tabList.length}个有关于“${searchValue}”的标签`
+                : `当前窗口打开了${tabList.length}个标签：`}
+            </span>
+            <Search className="header-search" onChange={this.handleSearchChange} />
+            <div className="header-trigger">
+              <RadioGroup value={display} buttonStyle="solid" onChange={this.handleDisplayChange}>
+                <RadioBtn value={displayTypes.CARDS}>
+                  <Icon type="appstore" />
+                </RadioBtn>
+                <RadioBtn value={displayTypes.LIST}>
+                  <Icon type="bars" />
+                </RadioBtn>
+              </RadioGroup>
+            </div>
+          </Row>
         </Header>
         <Content>
-          <Row gutter={20} type="flex" className="tab-list">
-            {tabList &&
-              tabList.map(tab => {
-                const cardClass = classNames({ 'active-tab': tab.active });
-                const pushpinIcon = `pushpin${tab.pinned ? '' : '-o'}`;
-                return (
-                  <Col key={tab.id} className="tab-item" {...itemLayout}>
-                    <Card
-                      className={cardClass}
-                      bordered
-                      cover={<img src={tab.capture} alt={tab.title} />}
-                      actions={[
-                        <Icon type={pushpinIcon} data-tabid={tab.id} onClick={this.handlePushpin} />,
-                        <Icon
-                          type="reload"
-                          spin={tab.status === tabStatus.LOADING}
-                          data-tabid={tab.id}
-                          onClick={this.handleReload}
-                        />,
-                        <Icon type="close" data-tabid={tab.id} onClick={this.handleClose} />
-                      ]}
-                    >
-                      <Meta
-                        data-tabid={tab.id}
-                        onClick={this.handleCardClick}
-                        title={tab.title}
-                        description={tab.url}
-                        avatar={tab.favIconUrl ? <Avatar src={tab.favIconUrl} /> : <Icon type="file" />}
-                      />
-                    </Card>
-                  </Col>
-                );
-              })}
-          </Row>
+          {(() => {
+            if (display === displayTypes.CARDS) return <Cards {...contentsProps} />;
+            if (display === displayTypes.LIST) return <List {...contentsProps} />;
+            return null;
+          })()}
         </Content>
       </Layout>
     );
