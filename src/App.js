@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { findDOMNode } from 'react-dom';
 import { Layout, Card, Avatar, Icon, Row, Col, Input, Radio, List as AntdList } from 'antd';
 import classNames from 'classnames';
 
@@ -94,9 +95,12 @@ const List = ({ tabs, handlePinning, handleReload, handleClose, handleSelect }) 
 };
 
 class App extends Component {
+  searchRef = React.createRef();
+
   state = { display: displayTypes.CARDS, tabs: [], searchValue: '' };
 
   async componentDidMount() {
+    // return;
     const { tabs } = await sendMessage({ msg: 'getTabs' });
     this.setState(() => ({ tabs }));
     chrome.runtime.onMessage.addListener(this.handleReceiveMsg);
@@ -154,12 +158,35 @@ class App extends Component {
 
   handleSearchChange = event => {
     const el = event.currentTarget;
-    this.setState(() => ({ searchValue: el.value }));
+    const searchValue = el.value;
+    this.changeSearchIcon(searchValue);
+    this.setState(() => ({ searchValue }));
+  };
+
+  handleSearchCancel = (value, event) => {
+    const el = event.target;
+    const isCancel = el.classList.contains('anticon-close');
+    if (!isCancel) return;
+    this.setState(() => ({ searchValue: '' }));
+    this.changeSearchIcon();
   };
 
   handleDisplayChange = event => {
     const el = event.target;
     this.setState(() => ({ display: el.value }));
+  };
+
+  changeSearchIcon = value => {
+    const node = findDOMNode(this.searchRef.current);
+    if (!node) return;
+    const iconNode = node.querySelector('.ant-input-search-icon');
+    const seachIcon = 'anticon-search',
+      closeIcon = 'anticon-close';
+    if (!iconNode) return;
+    const { classList } = iconNode;
+    if (!value) return classList.replace(closeIcon, seachIcon);
+    if (classList.contains(closeIcon)) return;
+    classList.replace(seachIcon, closeIcon);
   };
 
   /**
@@ -213,7 +240,13 @@ class App extends Component {
                 ? `当前打开了${tabList.length}个有关于“${searchValue}”的标签`
                 : `当前窗口打开了${tabList.length}个标签：`}
             </span>
-            <Search className="header-search" onChange={this.handleSearchChange} />
+            <Search
+              className="header-search"
+              value={searchValue}
+              onChange={this.handleSearchChange}
+              ref={this.searchRef}
+              onSearch={this.handleSearchCancel}
+            />
             <div className="header-trigger">
               <RadioGroup value={display} buttonStyle="solid" onChange={this.handleDisplayChange}>
                 <RadioBtn value={displayTypes.CARDS}>
