@@ -6,6 +6,7 @@
  * 12. 如果当前页在刷新，如果刷新完成的时候，还在当前，而且冇截图，就截屏个屏
  * 15. 点图片展开大图
  * 17. 确认删除 提示， 不再提示
+ * 19. 点击Icon时更新下标签数目
  * 4. 暂时没想到
  *
  * DONE:
@@ -42,6 +43,14 @@ async function setTabsCount(num) {
   chrome.browserAction.setBadgeText({ text: String(num) });
 }
 
+async function updateTabCount() {
+  const tabs = await getAllTabs();
+  tabCount = tabs.length;
+  console.log('open %s tabs', tabCount);
+  console.log('tabs list', tabs);
+  setTabsCount(tabCount);
+}
+
 function formatTabs(tabs, captures) {
   return tabs.map(tab => {
     captures[tab.id] && (tab.capture = captures[tab.id]);
@@ -67,13 +76,6 @@ async function dealWithGetTabs(params, sender) {
   console.log('send at %s', +new Date());
   sender({ tabs: formatTabs(tabs, captureMaps) });
 }
-
-getAllTabs().then(async tabs => {
-  tabCount = tabs.length;
-  console.log('open %s tabs', tabCount);
-  console.log('tabs list', tabs);
-  setTabsCount(tabCount);
-});
 
 chrome.runtime.onMessage.addListener(function({ msg }, sender, sendResponse) {
   console.log('recive ', msg);
@@ -123,6 +125,8 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
 chrome.browserAction.onClicked.addListener(function() {
   console.log('on icon click');
   try {
+    // 更新标签数目
+    updateTabCount();
     openExtensionTab();
   } catch (error) {
     console.log('onClicked error', error);
@@ -132,3 +136,6 @@ chrome.browserAction.onClicked.addListener(function() {
 chrome.commands.onCommand.addListener(function(command) {
   console.log('Command:', command);
 });
+
+// 初始化标签数目
+updateTabCount();
