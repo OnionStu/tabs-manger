@@ -7,6 +7,7 @@
  * 15. 点图片展开大图
  * 17. 确认删除 提示， 不再提示
  * 19. 点击Icon时更新下标签数目
+ * 20. URL后面添加 复制URL 按钮
  * 4. 暂时没想到
  *
  * DONE:
@@ -27,7 +28,7 @@
  * 只能首先获取全部Tabs数量，在打开拓展时才获取当前窗口数量…
  */
 
-import { getTab, tabStatus, getOpenTabs, queryTabs, sendMessage, getAllTabs } from './utils';
+import { getTab, tabStatus, getOpenTabs, queryTabs, sendMessage, getAllTabs, resizeImg } from './utils';
 
 console.log('Background start at %s', +new Date());
 
@@ -110,8 +111,9 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   if (tab.url && tab.status === tabStatus.COMPLETE) {
     // 如果不是 chrome的设置类页面，而且是已完成状态的话就截个屏（截屏）
     if (!tab.url.startsWith('chrome://')) {
-      chrome.tabs.captureVisibleTab(dataUrl => {
-        captureMaps[tabId] = dataUrl;
+      chrome.tabs.captureVisibleTab(async dataUrl => {
+        // captureMaps[tabId] = dataUrl;
+        captureMaps[tabId] = await resizeImg(dataUrl, { width: 600 });
       });
     }
     // 如果点击是当前拓展的Tab 那就更新下 tabs的状态

@@ -3,6 +3,31 @@ export const tabStatus = {
   COMPLETE: 'complete'
 };
 
+export function resizeImg(imgData, { width, height }) {
+  const canvas = document.createElement('canvas');
+  const canvasContext = canvas.getContext('2d');
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const imgWidth = img.width;
+      const imgHeight = img.height;
+      if (width && !height) {
+        const scaleRate = imgWidth / width;
+        height = imgHeight / scaleRate;
+      }
+      if (height && !width) {
+        const scaleRate = imgWidth / width;
+        height = imgHeight / scaleRate;
+      }
+      canvas.width = width;
+      canvas.height = height;
+      canvasContext.drawImage(img, 0, 0, imgWidth, imgHeight, 0, 0, width, height);
+      resolve(canvas.toDataURL());
+    };
+    img.src = imgData;
+  });
+}
+
 export function isOnlyWeb() {
   return !chrome.tabs;
 }
