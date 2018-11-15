@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
-import { Layout, Card, Avatar, Icon, Row, Col, Input, Radio, List as AntdList } from 'antd';
+import { Layout, Card, Avatar, Icon, Row, Col, Input, Radio, List as AntdList, message } from 'antd';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import classNames from 'classnames';
 
 import { sendMessage, updateTab, getTab, deleteTabs, tabStatus, reloadTab } from './utils';
@@ -25,33 +26,37 @@ const ReloadIcon = ({ tab, handleClick }) => (
 
 const CloseIcon = ({ tab, handleClick }) => <Icon type="close" data-tabid={tab.id} onClick={handleClick} />;
 
+const CardDescription = ({ text }) => {
+  const handleCopy = () => message.success('复制成功');
+
+  return (
+    <div className="copy-wrapper">
+      <span>{text}</span>
+      <CopyToClipboard text={text} onCopy={handleCopy}>
+        <Icon type="copy" className="copy-btn" title="复制URL" />
+      </CopyToClipboard>
+    </div>
+  );
+};
 const Cards = ({ tabs, handlePinning, handleReload, handleClose, handleSelect }) => {
   const itemLayout = { sm: 12, md: 12, xl: 8, xxl: 6 };
   return (
     <Row gutter={20} type="flex" className="tab-cards">
       {tabs &&
         tabs.map(tab => {
-          const cardClass = classNames({ 'active-tab': tab.active });
-
+          const cardClass = classNames({ 'active-tab': tab.active }),
+            cover = <img src={tab.capture} alt={tab.title} />,
+            actions = [
+              <PushpinIcon tab={tab} handleClick={handlePinning} />,
+              <ReloadIcon tab={tab} handleClick={handleReload} />,
+              <CloseIcon tab={tab} handleClick={handleClose} />
+            ],
+            desc = <CardDescription text={tab.url} />,
+            avatar = tab.favIconUrl ? <Avatar src={tab.favIconUrl} /> : <Icon type="file" />;
           return (
             <Col key={tab.id} className="tab-item" {...itemLayout}>
-              <Card
-                className={cardClass}
-                bordered
-                cover={<img src={tab.capture} alt={tab.title} />}
-                actions={[
-                  <PushpinIcon tab={tab} handleClick={handlePinning} />,
-                  <ReloadIcon tab={tab} handleClick={handleReload} />,
-                  <CloseIcon tab={tab} handleClick={handleClose} />
-                ]}
-              >
-                <Meta
-                  data-tabid={tab.id}
-                  onClick={handleSelect}
-                  title={tab.title}
-                  description={tab.url}
-                  avatar={tab.favIconUrl ? <Avatar src={tab.favIconUrl} /> : <Icon type="file" />}
-                />
+              <Card className={cardClass} bordered cover={cover} actions={actions}>
+                <Meta data-tabid={tab.id} onClick={handleSelect} title={tab.title} description={desc} avatar={avatar} />
               </Card>
             </Col>
           );
@@ -100,6 +105,10 @@ class App extends Component {
   state = { display: displayTypes.CARDS, tabs: [], searchValue: '' };
 
   async componentDidMount() {
+    // 本地调试用
+    // const tabs = require('./tabs.json');
+    // console.log(tabs);
+    // this.setState(() => ({ tabs }));
     // return;
     const { tabs } = await sendMessage({ msg: 'getTabs' });
     this.setState(() => ({ tabs }));
@@ -149,9 +158,10 @@ class App extends Component {
   };
 
   handleCardClick = event => {
-    const el = event.currentTarget;
-    if (el.classList.contains('active-tab')) return;
-    const { dataset } = el;
+    const { target, currentTarget } = event;
+    if (target.classList.contains('copy-btn')) return;
+    if (currentTarget.classList.contains('active-tab')) return;
+    const { dataset } = currentTarget;
     const tabId = +dataset.tabid;
     updateTab(tabId, { active: true });
   };
