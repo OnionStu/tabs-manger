@@ -19,11 +19,10 @@
     "scripts": ["static/js/background.js"]
   },
   "commands": {
-    "toggle-feature": {
+    "_execute_browser_action": {
       "suggested_key": {
-        "default": "Ctrl+Shift+U"
-      },
-      "description": "Send a 'toggle-feature' event to the extension"
+        "default": "Alt+Shift+T"
+      }
     }
   }
 }

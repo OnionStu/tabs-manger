@@ -92,18 +92,18 @@ chrome.runtime.onMessage.addListener(function({ msg }, sender, sendResponse) {
 });
 
 chrome.tabs.onCreated.addListener(tab => {
-  console.log('onCreated...', tab);
+  // console.log('onCreated...', tab);
   setTabsCount(++tabCount);
 });
 
 chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
-  console.log('onRemoved...', tabId, removeInfo);
+  // console.log('onRemoved...', tabId, removeInfo);
   setTabsCount(--tabCount);
   sendMessage({ msg: 'deleteTab', tabId });
 });
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  console.log('onUpdated...', tabId, changeInfo, tab);
+  // console.log('onUpdated...', tabId, changeInfo, tab);
   const tabs = await queryTabs({ url: indexURL });
   if (!tabs.length) return;
   sendMessage({ msg: 'updateTab', tabId, tab });
@@ -112,7 +112,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 // callback 中 只有 tabId， windowId, windowId暂时没啥用，所以只取tabId
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   const tab = await getTab(tabId);
-  console.log('onActivated...', tab);
+  // console.log('onActivated...', tab);
   if (tab.url && tab.status === tabStatus.COMPLETE) {
     // 如果不是 chrome的设置类页面，而且是已完成状态的话就截个屏（截屏）
     if (!tab.url.startsWith('chrome://') || !tab.url.startsWith('about:')) {
@@ -158,10 +158,3 @@ chrome.browserAction.onClicked.addListener(function() {
 
 // 初始化标签数目
 updateTabCount();
-
-async function listAllCommands() {
-  const commands = await chrome.commands.getAll();
-  console.log('commands', commands);
-}
-
-console.log('commands func', listAllCommands());
