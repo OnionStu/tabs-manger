@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Tabs Manger",
   "description": "list opened all tabs, choose what I need",
-  "version": "1.0",
+  "version": "1.1",
   "icons": {
     "16": "img/icon-16.png",
     "128": "img/icon-128.png"
@@ -12,18 +12,18 @@
       "19": "img/icon-19.png",
       "38": "img/icon-38.png"
     },
-    "defaule_title": "Tabs"
+    "default_title": "Tabs"
   },
-  "permissions": ["tabs", "background", "<all_urls>", "storage"],
+  "permissions": ["tabs", "<all_urls>", "storage"],
   "background": {
-    "persistent": false,
-    "page": "background.html"
+    "scripts": ["static/js/background.js"]
   },
   "commands": {
-    "_execute_browser_action": {
+    "toggle-feature": {
       "suggested_key": {
-        "default": "Alt+Shift+T"
-      }
+        "default": "Ctrl+Shift+U"
+      },
+      "description": "Send a 'toggle-feature' event to the extension"
     }
   }
 }

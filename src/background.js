@@ -59,17 +59,22 @@ function formatTabs(tabs, captures) {
   });
 }
 
-function openExtensionTab() {
-  chrome.tabs.getAllInWindow(undefined, function(tabs) {
-    for (let i = 0, tab; (tab = tabs[i]); i++) {
-      if (tab.url && tab.url === indexURL) {
-        chrome.tabs.update(tab.id, { selected: true });
-        return;
-      }
-    }
-    console.log('no one create one');
-    chrome.tabs.create({ url: indexURL });
-  });
+async function openExtensionTab() {
+  const tabs = await queryTabs({ url: indexURL });
+  if (tabs && tabs.length) {
+    chrome.tabs.update(tabs[0].id, { selected: true });
+    return;
+  }
+  // chrome.tabs.getAllInWindow(undefined, function(tabs) {
+  //   for (let i = 0, tab; (tab = tabs[i]); i++) {
+  //     if (tab.url && tab.url === indexURL) {
+  //       chrome.tabs.update(tab.id, { selected: true });
+  //       return;
+  //     }
+  //   }
+  console.log('no one create one');
+  chrome.tabs.create({ url: indexURL });
+  // });
 }
 
 async function dealWithGetTabs(params, sender) {
@@ -110,7 +115,7 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   console.log('onActivated...', tab);
   if (tab.url && tab.status === tabStatus.COMPLETE) {
     // 如果不是 chrome的设置类页面，而且是已完成状态的话就截个屏（截屏）
-    if (!tab.url.startsWith('chrome://')) {
+    if (!tab.url.startsWith('chrome://') || !tab.url.startsWith('about:')) {
       chrome.tabs.captureVisibleTab(async dataUrl => {
         // captureMaps[tabId] = dataUrl;
         captureMaps[tabId] = await resizeImg(dataUrl, { width: 600 });
@@ -135,9 +140,28 @@ chrome.browserAction.onClicked.addListener(function() {
   }
 });
 
-chrome.commands.onCommand.addListener(function(command) {
-  console.log('Command:', command);
-});
+// chrome.commands.onCommand.addListener(function(command) {
+//   console.log('Command:', command);
+//   if (command === 'toggle-open') {
+//     console.log('will open');
+//     openExtensionTab();
+//   }
+// });
+
+// let gettingAllCommands = chrome.commands.getAll();
+// gettingAllCommands.then(commands => {
+//   console.log('commands...');
+//   for (let command of commands) {
+//     console.log(command);
+//   }
+// });
 
 // 初始化标签数目
 updateTabCount();
+
+async function listAllCommands() {
+  const commands = await chrome.commands.getAll();
+  console.log('commands', commands);
+}
+
+console.log('commands func', listAllCommands());
