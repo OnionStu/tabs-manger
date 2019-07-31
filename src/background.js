@@ -62,16 +62,9 @@ function formatTabs(tabs, captures) {
 async function openExtensionTab() {
   const tabs = await queryTabs({ url: indexURL });
   if (tabs && tabs.length) {
-    chrome.tabs.update(tabs[0].id, { selected: true });
+    chrome.tabs.update(tabs[0].id, { active: true });
     return;
   }
-  // chrome.tabs.getAllInWindow(undefined, function(tabs) {
-  //   for (let i = 0, tab; (tab = tabs[i]); i++) {
-  //     if (tab.url && tab.url === indexURL) {
-  //       chrome.tabs.update(tab.id, { selected: true });
-  //       return;
-  //     }
-  //   }
   console.log('no one create one');
   chrome.tabs.create({ url: indexURL });
   // });

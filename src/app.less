@@ -1,3 +1,6 @@
+@screen-sm: 920px;
+@min-width: 800px;
+
 .img() {
   position: relative;
   img {
@@ -11,7 +14,7 @@
       height: 100%;
       background-color: #f7f7f7;
       z-index: 1;
-      content: '';
+      content: "";
     }
     &:after {
       position: absolute;
@@ -19,7 +22,7 @@
       left: 50%;
       transform: translate(-50%, -50%);
       font-family: anticon !important;
-      content: '\e674' ' ' attr(alt);
+      content: "\e674"" " attr(alt);
       color: #ccc;
       font-size: 0.35rem;
       z-index: 2;
@@ -34,21 +37,29 @@
 .main-layout {
   height: 100vh;
   overflow: auto;
+  min-width: @min-width;
   .ant-layout-header {
     position: fixed;
     z-index: 233;
     width: 100%; // box-shadow: 0 15px 20px -10px #ccc;
     border-bottom: 1px solid #ccc;
+    > .ant-row-flex {
+      min-width: @min-width;
+    }
     .header-title,
     .header-search {
       font-size: 2em;
+      @media (max-width: @screen-sm) {
+        font-size: 1.5em;
+      }
     }
     .header-title {
       flex: 1;
+      line-height: 64px;
     }
     .header-search {
       width: auto;
-      padding: 5px 0;
+      padding: 10px 0;
       .ant-input {
         height: inherit;
         font-size: inherit;
@@ -65,9 +76,9 @@
         line-height: 1.5;
       }
       .ant-radio-button-wrapper {
-        font-size: 2em;
-        line-height: 2em;
-        height: 2em;
+        font-size: 1.5em;
+        line-height: 1.5em;
+        height: 1.5em;
       }
       .anticon-bars:before {
         transform: scale(1.5);
@@ -97,16 +108,16 @@
     position: relative;
     &:hover {
       .copy-btn {
-        transform: translate3d(-1em, 0, 0)
+        transform: translate3d(-1em, 0, 0);
       }
     }
     .copy-btn {
       position: absolute;
       bottom: 0;
       right: -1em;
-      transition: all .5s;
+      transition: all 0.5s;
       &:hover {
-        color: #1890ff
+        color: #1890ff;
       }
     }
   }
@@ -150,6 +161,7 @@
       min-width: 300px;
       max-width: 300px;
       min-height: 150px;
+      display: block;
     }
   }
   .ant-list-item-action {
@@ -157,7 +169,6 @@
     bottom: 0;
     .anticon {
       font-size: 1.5em;
-      ;
     }
   }
 }
