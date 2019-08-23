@@ -210,7 +210,11 @@ class App extends Component {
     if (!str.trim()) return tabs;
     const chineseReg = /[\u4e00-\u9fa5]/g;
     const hasChinese = chineseReg.test(str);
-    const valueReg = new RegExp(str, 'i');
+    // 转移特殊字符
+    const keyChars = '!@#$%^&*()_+-={}[]|\\;:\'",./<>?`~';
+    const regStr = str.split('').map(s => keyChars.indexOf(s)>0?`\\${s}`:s).join('');
+    const valueReg = new RegExp(regStr, 'i');
+    console.log('valueReg', valueReg);
     const result = tabs.filter(tab => {
       // 如果 没有中文，就只匹配url，如果url有包含关键字 返回true
       if (!hasChinese && valueReg.test(tab.url)) return true;
