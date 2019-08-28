@@ -251,7 +251,7 @@ class App extends Component {
           <Row type="flex">
             <span className="header-title">
               {searchValue
-                ? `当前打开了${tabList.length}个有关于“${searchValue}”的标签`
+                ? `当前打开了${tabList.length}个关于${searchValue.length>6?"搜索内容":`“${searchValue}”`}的标签`
                 : `当前窗口打开了${tabList.length}个标签：`}
             </span>
             <Search
