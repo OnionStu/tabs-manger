@@ -36,6 +36,10 @@ let tabCount = 0;
 const indexURL = chrome.extension.getURL('index.html');
 const captureMaps = {};
 
+/**
+ * 设置下标数字 
+ * @param {number} num Tab的当前数量
+ */
 async function setTabsCount(num) {
   if (num < 1) {
     const tabs = await getOpenTabs();
@@ -44,6 +48,9 @@ async function setTabsCount(num) {
   chrome.browserAction.setBadgeText({ text: String(num) });
 }
 
+/**
+ * 更新Tab计数
+ */
 async function updateTabCount() {
   const tabs = await getAllTabs();
   tabCount = tabs.length;
@@ -52,6 +59,9 @@ async function updateTabCount() {
   setTabsCount(tabCount);
 }
 
+/**
+ * 格式化Tab列表
+ */
 function formatTabs(tabs, captures) {
   return tabs.map(tab => {
     captures[tab.id] && (tab.capture = captures[tab.id]);
@@ -59,6 +69,9 @@ function formatTabs(tabs, captures) {
   });
 }
 
+/**
+ * 打开工具
+ */
 async function openExtensionTab() {
   const tabs = await queryTabs({ url: indexURL });
   if (tabs && tabs.length) {
@@ -67,7 +80,6 @@ async function openExtensionTab() {
   }
   console.log('no one create one');
   chrome.tabs.create({ url: indexURL });
-  // });
 }
 
 async function dealWithGetTabs(params, sender) {
@@ -76,7 +88,7 @@ async function dealWithGetTabs(params, sender) {
   sender({ tabs: formatTabs(tabs, captureMaps) });
 }
 
-chrome.runtime.onMessage.addListener(function({ msg }, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function({ msg }, _sender, sendResponse) {
   console.log('recive ', msg);
   if (msg === 'getTabs') {
     dealWithGetTabs(msg, sendResponse);
@@ -84,25 +96,40 @@ chrome.runtime.onMessage.addListener(function({ msg }, sender, sendResponse) {
   return true;
 });
 
+/**
+ * 监听Tab增加事件
+ */
 chrome.tabs.onCreated.addListener(tab => {
   // console.log('onCreated...', tab);
+  // 计数+1
   setTabsCount(++tabCount);
 });
 
+/**
+ * 监听Tab删除事件
+ */
 chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
   // console.log('onRemoved...', tabId, removeInfo);
+  // 计数 +1
   setTabsCount(--tabCount);
+  // 通知前端 删除的Tab的Id
   sendMessage({ msg: 'deleteTab', tabId });
 });
 
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+/**
+ * 监听Tab更新事件
+ */
+chrome.tabs.onUpdated.addListener(async (tabId, _changeInfo, tab) => {
   // console.log('onUpdated...', tabId, changeInfo, tab);
   const tabs = await queryTabs({ url: indexURL });
   if (!tabs.length) return;
   sendMessage({ msg: 'updateTab', tabId, tab });
 });
 
-// callback 中 只有 tabId， windowId, windowId暂时没啥用，所以只取tabId
+/**
+ * 监听浏览器激活Tab后的事件
+ * callback 中 只有 tabId， windowId, windowId暂时没啥用，所以只取tabId
+ */
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   const tab = await getTab(tabId);
   // console.log('onActivated...', tab);
@@ -122,6 +149,9 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   }
 });
 
+/**
+ * 浏览器按钮事件监听
+ */
 chrome.browserAction.onClicked.addListener(function() {
   console.log('on icon click');
   try {
@@ -133,19 +163,14 @@ chrome.browserAction.onClicked.addListener(function() {
   }
 });
 
+/**
+ * 监听以注册命令
+ */
 // chrome.commands.onCommand.addListener(function(command) {
 //   console.log('Command:', command);
 //   if (command === 'toggle-open') {
 //     console.log('will open');
 //     openExtensionTab();
-//   }
-// });
-
-// let gettingAllCommands = chrome.commands.getAll();
-// gettingAllCommands.then(commands => {
-//   console.log('commands...');
-//   for (let command of commands) {
-//     console.log(command);
 //   }
 // });
 
