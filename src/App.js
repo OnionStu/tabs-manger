@@ -110,6 +110,7 @@ class App extends Component {
     // console.log(tabs);
     // this.setState(() => ({ tabs }));
     // return;
+
     const { tabs } = await sendMessage({ msg: 'getTabs' });
     this.setState(() => ({ tabs }));
     chrome.runtime.onMessage.addListener(this.handleReceiveMsg);
