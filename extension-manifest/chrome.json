@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Tabs Manger",
   "description": "list opened all tabs, choose what I need",
-  "version": "1.1.2",
+  "version": "1.1.1",
   "icons": {
     "16": "img/icon-16.png",
     "128": "img/icon-128.png"
@@ -14,9 +14,10 @@
     },
     "default_title": "Tabs"
   },
-  "permissions": ["tabs", "<all_urls>", "storage"],
+  "content_security_policy": "script-src 'self'; object-src 'self'",
+  "permissions": ["tabs", "background", "<all_urls>", "storage"],
   "background": {
-    "scripts": ["static/js/background.js"]
+    "page": "background.html"
   },
   "commands": {
     "_execute_browser_action": {
